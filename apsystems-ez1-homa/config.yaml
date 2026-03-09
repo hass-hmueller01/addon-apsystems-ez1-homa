@@ -10,10 +10,8 @@ arch:
   - aarch64
   - amd64
 init: false
-permissions:
-  homeassistant: read
-  supervisor: read
-  core: read
+hassio_api: true
+homeassistant_api: true
 options:
   device_name: "Solar PV Balkonkraftwerk"
   homa_room: "Sensors"
