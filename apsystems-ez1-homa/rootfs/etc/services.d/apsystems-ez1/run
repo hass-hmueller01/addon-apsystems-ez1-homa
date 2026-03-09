@@ -12,15 +12,19 @@ source get_mqtt_settings.sh
 # Activate the virtual environment
 source .venv/bin/activate
 
+# Fetch Home Assistant config to get latitude and longitude
+# needs the "homeassistant_api: true" and "hassio_api: true" permissions in config.yaml
+api_config=$(curl -s -H "Authorization: Bearer $SUPERVISOR_TOKEN" http://supervisor/core/api/config)
+
 # create the service configuration
 export APS_ECU_IP="$(bashio::config 'aps_ecu_ip')"
 export APS_ECU_PORT=$(bashio::config 'aps_ecu_port' '8050')
 export APS_ECU_UPDATE_INTERVAL=$(bashio::config 'aps_ecu_update_interval' '10')
 export APS_ECU_STOP_AT_NIGHT=True
-# aps_ecu_position_lat=$(bashio::info.latitude)
-# aps_ecu_position_lng=$(bashio::info.longitude)
-export APS_ECU_POSITION_LAT=$(bashio::config 'latitude')
-export APS_ECU_POSITION_LNG=$(bashio::config 'longitude')
+# export APS_ECU_POSITION_LAT=$(bashio::info.latitude) # bashio::info.latitude is not supported any more
+# export APS_ECU_POSITION_LNG=$(bashio::info.longitude) # use the API to get the latitude and longitude instead
+export APS_ECU_POSITION_LAT=$(echo "$api_config" | jq -r '.latitude')
+export APS_ECU_POSITION_LNG=$(echo "$api_config" | jq -r '.longitude')
 export APS_ECU_TIMEZONE="$(bashio::info.timezone)"
 
 export MQTT_BROKER_HOST="${MQTT_HOST}"
@@ -37,12 +41,12 @@ export HASS_DEVICE_NAME="$(bashio::config 'device_name')"
 export HASS_NAME_PREFIX="Solar "
 export HASS_AREA="$(bashio::config 'hass_area')"
 
-bashio::log.info "Token: $SUPERVISOR_TOKEN"
-curl -v \
-  -H "Authorization: Bearer $SUPERVISOR_TOKEN" \
-  http://supervisor/core/api/config
+if bashio::config.true 'debug'; then
+    bashio::log.info "APS_ECU_POSITION_LAT: $APS_ECU_POSITION_LAT"
+    bashio::log.info "APS_ECU_POSITION_LNG: $APS_ECU_POSITION_LNG"
+    bashio::log.info "APS_ECU_TIMEZONE: $APS_ECU_TIMEZONE"
+fi
 
-#tail -f /dev/null
 bashio::config.true 'debug' && extra_parms="-d" || extra_parms=""
 
 # Start the apsystems-ez1 service
