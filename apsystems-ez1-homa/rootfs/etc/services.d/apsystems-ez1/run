@@ -1,0 +1,51 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Start the service
+# s6-overlay docs: https://github.com/just-containers/s6-overlay
+# ==============================================================================
+
+bashio::log.info "apsystems-ez1 service starting ..."
+
+# Fetch MQTT settings
+source get_mqtt_settings.sh
+
+# Activate the virtual environment
+source .venv/bin/activate
+
+# create the service configuration
+export APS_ECU_IP="$(bashio::config 'aps_ecu_ip')"
+export APS_ECU_PORT=$(bashio::config 'aps_ecu_port' '8050')
+export APS_ECU_UPDATE_INTERVAL=$(bashio::config 'aps_ecu_update_interval' '10')
+export APS_ECU_STOP_AT_NIGHT=True
+# aps_ecu_position_lat=$(bashio::info.latitude)
+# aps_ecu_position_lng=$(bashio::info.longitude)
+export APS_ECU_POSITION_LAT=$(bashio::config 'latitude')
+export APS_ECU_POSITION_LNG=$(bashio::config 'longitude')
+export APS_ECU_TIMEZONE="$(bashio::info.timezone)"
+
+export MQTT_BROKER_HOST="${MQTT_HOST}"
+export MQTT_BROKER_PORT="${MQTT_PORT}"
+export MQTT_BROKER_USER="${MQTT_USER}"
+export MQTT_BROKER_PASSWD="${MQTT_PASSWORD}"
+export MQTT_BROKER_SECURED_CONNECTION=False
+export MQTT_CLIENT_ID="APsystemsEZ1mqtt_addon"
+export HOMA_ENABLED=True
+export HOMA_ROOM="$(bashio::config 'homa_room')"
+export HOMA_NAME="$(bashio::config 'device_name')"
+export HASS_ENABLED=True
+export HASS_DEVICE_NAME="$(bashio::config 'device_name')"
+export HASS_NAME_PREFIX="Solar "
+export HASS_AREA="$(bashio::config 'hass_area')"
+
+bashio::log.info "Token: $SUPERVISOR_TOKEN"
+curl -v \
+  -H "Authorization: Bearer $SUPERVISOR_TOKEN" \
+  http://supervisor/core/api/config
+
+#tail -f /dev/null
+bashio::config.true 'debug' && extra_parms="-d" || extra_parms=""
+
+# Start the apsystems-ez1 service
+exec python3 -m apsystems_ez1_mqtt $extra_parms
+
+#tail -f /dev/null

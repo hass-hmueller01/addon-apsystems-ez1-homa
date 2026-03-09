@@ -1,0 +1,10 @@
+.DS_Store
+.venv/
+*.log
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+poetry.lock
+
+apsystems-ez1/config.yaml
