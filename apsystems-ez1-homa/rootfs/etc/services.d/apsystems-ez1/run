@@ -19,8 +19,8 @@ api_config=$(curl -s -H "Authorization: Bearer $SUPERVISOR_TOKEN" http://supervi
 # create the service configuration
 export APS_ECU_IP="$(bashio::config 'aps_ecu_ip')"
 export APS_ECU_PORT=$(bashio::config 'aps_ecu_port' '8050')
-export APS_ECU_UPDATE_INTERVAL=$(bashio::config 'aps_ecu_update_interval' '10')
-export APS_ECU_STOP_AT_NIGHT=True
+export APS_ECU_UPDATE_INTERVAL=$(bashio::config 'aps_ecu_update_interval' '15')
+export APS_ECU_STOP_AT_NIGHT=$(bashio::config 'aps_ecu_stop_at_night' 'false')
 # export APS_ECU_POSITION_LAT=$(bashio::info.latitude) # bashio::info.latitude is not supported any more
 # export APS_ECU_POSITION_LNG=$(bashio::info.longitude) # use the API to get the latitude and longitude instead
 export APS_ECU_POSITION_LAT=$(echo "$api_config" | jq -r '.latitude')
