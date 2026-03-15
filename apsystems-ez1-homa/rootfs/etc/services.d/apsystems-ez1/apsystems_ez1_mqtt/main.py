@@ -148,8 +148,8 @@ async def main():
                     maxPower=int(800),
                     isBatterySystem=False)
             else:
-                _logger.error("Can't read APsystems info data. Waiting for a minute ...")
-                await asyncio.sleep(60)
+                _logger.error("Can't read APsystems info data. Waiting for 10 minutes ...")
+                await asyncio.sleep(10 * 60)
 
     if not conf.mqtt_config.homa_systemid:
         # if no homa_systemid is given in config use deviceId
