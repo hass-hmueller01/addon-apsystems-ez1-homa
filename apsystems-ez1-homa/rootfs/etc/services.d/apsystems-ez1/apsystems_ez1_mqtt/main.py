@@ -6,6 +6,7 @@
 """Query APsystems EZ1 inverter data periodically and send them to the MQTT broker"""
 import asyncio
 import logging
+import os
 import sys
 
 from argparse import ArgumentParser
@@ -103,7 +104,10 @@ async def periodic_get_power(interval: float):
                 status_power = await _ecu.get_device_power_status()
                 _mqtt.publish_status_power(status_power)
             except (Exception) as e:
-                _logger.error("An exception occured: %s -> %s", e.__class__.__name__, str(e))
+                if isinstance(e, TimeoutError):
+                    _logger.debug("Timeout while reading power data. This can be normal if the ECU is sleeping. Exception: %s -> %s", e.__class__.__name__, str(e))
+                else:
+                    _logger.error("An exception occured: %s -> %s", e.__class__.__name__, str(e))
 
         next_update_time = (now.astimezone(_ecu.city.tzinfo) + timedelta(0, sleeptime)).strftime("%Y-%m-%d %H:%M:%S %Z")
         _logger.debug("Next update at: %s (in %0.2fs)", next_update_time, sleeptime)
