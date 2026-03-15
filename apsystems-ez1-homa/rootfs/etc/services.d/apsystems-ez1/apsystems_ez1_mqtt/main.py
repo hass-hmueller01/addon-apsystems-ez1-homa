@@ -124,8 +124,11 @@ async def main():
     if not conf.ecu_config.ipaddr:
         _logger.error("APS_ECU_IP not found. No config given? Use -h")
         sys.exit(1)
+
+    fmt = os.getenv("BASHIO_LOG_FORMAT", "[%(asctime)s] %(levelname)s: %(funcName)s(): %(message)s")
+    datefmt = os.getenv("BASHIO_LOG_DATEFMT", os.getenv("LOG_TIMESTAMP", "%Y-%m-%d %T"))
     logging.basicConfig(level=logging.DEBUG if args.debug else logging.INFO,
-                        format="%(levelname)s:%(name)s.%(funcName)s(): %(message)s")
+                        format=fmt, datefmt=datefmt)
     _ecu = ECU(conf.ecu_config)
 
     _logger.info("Read data from APsystems EZ1 at http://%s:%d", conf.ecu_config.ipaddr, conf.ecu_config.port)
