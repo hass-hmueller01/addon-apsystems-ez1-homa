@@ -315,7 +315,7 @@ class MQTTHandler:
             "name":self.mqtt_config.hass_name_prefix + mqtt_d_item['topic'],
             "state_topic":state_topic,
             "unique_id":object_id,
-            "object_id":object_id,
+            "default_entity_id":object_id,
             "device":{
                 "identifiers":[self.mqtt_config.hass_device_id],
                 "name":self.mqtt_config.hass_device_name,
